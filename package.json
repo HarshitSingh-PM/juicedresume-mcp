@@ -1,6 +1,7 @@
 {
   "name": "@juicedresume/mcp",
-  "version": "0.3.1",
+  "version": "0.4.2",
+  "mcpName": "com.juicedresume/mcp",
   "description": "Model Context Protocol server for JuicedResume — score, tailor, and edit your resume from any MCP client (Claude Code, Claude Desktop, Cursor).",
   "keywords": [
     "mcp",
@@ -11,13 +12,10 @@
     "ats",
     "juicedresume"
   ],
-  "homepage": "https://juicedresume.com/mcp",
+  "homepage": "https://juicedresume.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/HarshitSingh-PM/juicedresume-mcp.git"
-  },
-  "bugs": {
-    "url": "https://github.com/HarshitSingh-PM/juicedresume-mcp/issues"
   },
   "license": "MIT",
   "author": "Harshit Singh <harshit@halacarly.com>",
@@ -45,6 +43,9 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@juiced/libraries": "*",
+    "@juiced/schema": "*",
+    "@juiced/scoring": "*",
     "@types/node": "^22.9.0",
     "esbuild": "^0.24.2",
     "esbuild-wasm": "^0.24.2",

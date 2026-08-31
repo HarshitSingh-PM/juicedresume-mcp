@@ -26,8 +26,15 @@ const ok = (data: any) => ({ content: [{ type: "text", text: typeof data === "st
 async function mutate(id: string, fn: (r: TResume) => TResume) {
   const r = await getResume(id);
   if (!r) throw new Error(`Resume not found: ${id}`);
-  const next = fn(r);
-  return await saveResume(next);
+  // Re-parse before saving: raw patches are spread in untyped, and a persisted
+  // wrong-typed field would make every future getResume() fail its parse —
+  // the resume would look deleted. Reject the bad patch instead.
+  const parsed = Resume.safeParse(fn(r));
+  if (!parsed.success) {
+    const first = parsed.error.issues[0];
+    throw new Error(`Invalid patch — resume would no longer validate (${first?.path.join(".")}: ${first?.message}).`);
+  }
+  return await saveResume(parsed.data);
 }
 
 // ---------- tool definitions ----------
@@ -113,7 +120,9 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
       case "add_section":
         return ok(await mutate(args.id, r => {
           const type = args.type as SectionType;
-          if (!DEFAULT_SECTION_TITLES[type]) throw new Error(`unknown section type: ${type}`);
+          // hasOwn, not truthiness: type="toString" would hit an inherited
+          // Object.prototype member and pass a plain lookup.
+          if (!Object.hasOwn(DEFAULT_SECTION_TITLES, type)) throw new Error(`unknown section type: ${type}`);
           const section: TSection = { id: newId(), type, title: args.title || DEFAULT_SECTION_TITLES[type], visible: true, columns: 1, items: [] } as TSection;
           return { ...r, sections: [...r.sections, section] };
         }));

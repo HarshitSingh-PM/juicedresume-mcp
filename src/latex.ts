@@ -40,7 +40,7 @@ export function resumeToLatex(r: TResume): string {
 {\\LARGE \\textbf{${tex(p.fullName || "Your Name")}}}\\\\[2pt]
 ${p.title ? `{\\itshape ${tex(p.title)}}\\\\[2pt]` : ""}
 ${[
-  p.email && `\\href{mailto:${p.email}}{${tex(p.email)}}`,
+  p.email && `\\href{mailto:${texUrl(p.email)}}{${tex(p.email)}}`,
   p.phone && tex(p.phone),
   p.location && tex(p.location),
   p.linkedin && hrefHandle(p.linkedin),
@@ -90,7 +90,7 @@ ${i.description ? htmlToTex(i.description) : ""}
     case "projects":
       return `${header}\n${items.map((i: any) => `
 \\noindent\\textbf{${tex(i.name)}}${i.role ? ` --- ${tex(i.role)}` : ""}\\hfill ${tex(dateRange(i.startDate, i.endDate, false, r))}\\\\
-${i.link ? `\\href{${ensureProto(i.link)}}{${tex(i.link)}}\\\\` : ""}
+${i.link ? `\\href{${texUrl(ensureProto(i.link))}}{${tex(i.link)}}\\\\` : ""}
 ${htmlToTex(i.description)}
 `).join("\n")}\n`;
 
@@ -107,7 +107,7 @@ ${htmlToTex(i.description)}
 
     case "certificates":
       return `${header}\n\\begin{itemize}\n${items.map((i: any) =>
-        `  \\item \\textbf{${tex(i.name)}}${i.issuer ? ` --- ${tex(i.issuer)}` : ""}${i.date ? ` (${tex(i.date)})` : ""}${i.link ? ` \\href{${ensureProto(i.link)}}{link}` : ""}`
+        `  \\item \\textbf{${tex(i.name)}}${i.issuer ? ` --- ${tex(i.issuer)}` : ""}${i.date ? ` (${tex(i.date)})` : ""}${i.link ? ` \\href{${texUrl(ensureProto(i.link))}}{link}` : ""}`
       ).join("\n")}\n\\end{itemize}\n`;
 
     case "interests":
@@ -134,7 +134,7 @@ ${i.description ? htmlToTex(i.description) : ""}
     case "publications":
       return `${header}\n${items.map((i: any) => `
 \\noindent\\textbf{${tex(i.title)}}${i.publisher ? ` --- ${tex(i.publisher)}` : ""}${i.date ? `\\hfill ${tex(i.date)}` : ""}\\\\
-${i.link ? `\\href{${ensureProto(i.link)}}{${tex(i.link)}}\\\\` : ""}
+${i.link ? `\\href{${texUrl(ensureProto(i.link))}}{${tex(i.link)}}\\\\` : ""}
 ${i.description ? htmlToTex(i.description) : ""}
 `).join("\n")}\n`;
 
@@ -244,7 +244,7 @@ function inlineHtmlToTex(html: string): string {
       const href = m[1];
       const end = findCloseTag(src, close + 1, "a");
       const inner = src.slice(close + 1, end.start);
-      out += `\\href{${href}}{${inlineHtmlToTex(inner)}}`;
+      out += `\\href{${texUrl(decodeEntities(href))}}{${inlineHtmlToTex(inner)}}`;
       i = end.after; continue;
     }
     // unknown / self-closing tag — drop it
@@ -290,10 +290,18 @@ function htmlToTex(html: string): string {
   return html.split(/<\/?p[^>]*>/gi).map((c) => inlineHtmlToTex(c).trim()).filter(Boolean).join("\\\\\n");
 }
 function sanitizeColor(hex: string): string {
-  return hex.replace(/^#/, "").slice(0, 6).padEnd(6, "0");
+  return hex.replace(/[^0-9a-fA-F]/g, "").slice(0, 6).padEnd(6, "0");
+}
+/** Make a URL safe inside \href{...}. hyperref re-catcodes the URL argument,
+ *  so %/#/& survive as-is — the escape route is an unbalanced brace closing
+ *  the group early (e.g. "x.com}{\\input{/etc/passwd}}"). Percent-encoding
+ *  braces, backslashes, whitespace and quotes keeps the link working and the
+ *  group intact. */
+function texUrl(s: string): string {
+  return s.replace(/[{}\\\s"]/g, (c) => "%" + c.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0"));
 }
 function hrefHandle(s: string): string {
-  return `\\href{${ensureProto(s)}}{${tex(s)}}`;
+  return `\\href{${texUrl(ensureProto(s))}}{${tex(s)}}`;
 }
 function ensureProto(s: string): string {
   if (/^https?:\/\//i.test(s)) return s;

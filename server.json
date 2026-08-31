@@ -1,0 +1,30 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.juicedresume/mcp",
+  "description": "Score, tailor, and export resumes from any MCP client — 60+ ATS checks and JD tailoring.",
+  "version": "0.4.2",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@juicedresume/mcp",
+      "version": "0.4.2",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "JUICEDRESUME_TOKEN",
+          "description": "MCP token from juicedresume.com Settings → AI",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": true
+        }
+      ]
+    }
+  ],
+  "websiteUrl": "https://juicedresume.com/mcp",
+  "repository": {
+    "url": "https://github.com/HarshitSingh-PM/juicedresume-mcp",
+    "source": "github"
+  }
+}

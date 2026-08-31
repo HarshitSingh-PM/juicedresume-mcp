@@ -27,6 +27,14 @@ const CLOUD = CLOUD_TOKEN.length > 0;
 
 async function ensure(dir: string) { await fs.mkdir(dir, { recursive: true }); }
 
+/** Resume ids are newId()-shaped (url-safe token). Anything else — "../"
+ *  traversal in local mode, "/other/route" smuggling in cloud mode — is
+ *  rejected before it can reach a file path or a request path. */
+function assertSafeId(id: string): string {
+  if (!/^[A-Za-z0-9_-]{1,64}$/.test(id)) throw new Error(`JuicedResume: invalid resume id "${id}".`);
+  return id;
+}
+
 /** One authenticated call to the cloud API. Throws actionable errors. */
 async function cloudReq(method: string, p: string, body?: unknown): Promise<any> {
   let res: Response;
@@ -69,6 +77,7 @@ export async function listResumes(): Promise<TResume[]> {
 }
 
 export async function getResume(id: string): Promise<TResume | null> {
+  assertSafeId(id);
   if (CLOUD) {
     const data = await cloudReq("GET", `/resumes/${id}`);
     return data ? Resume.parse(data) : null;
@@ -80,6 +89,7 @@ export async function getResume(id: string): Promise<TResume | null> {
 }
 
 export async function saveResume(r: TResume): Promise<TResume> {
+  assertSafeId(r.id);
   const next: TResume = { ...r, updatedAt: new Date().toISOString() };
   if (CLOUD) {
     // PUT upserts (creates the row if the id is new) so create + duplicate work too.
@@ -111,6 +121,7 @@ export async function createBlankResume(name = "Untitled"): Promise<TResume> {
 }
 
 export async function deleteResume(id: string) {
+  assertSafeId(id);
   if (CLOUD) { await cloudReq("DELETE", `/resumes/${id}`); return; }
   try { await fs.unlink(path.join(RESUMES, `${id}.json`)); } catch {}
 }
