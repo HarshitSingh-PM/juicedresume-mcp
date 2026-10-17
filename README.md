@@ -1,6 +1,21 @@
-# @juicedresume/mcp
+# JuicedResume MCP Server
 
-Stdio [Model Context Protocol](https://modelcontextprotocol.io) server for [JuicedResume](https://juicedresume.com) — score, tailor, and edit your resume from any MCP client (Claude Code, Claude Desktop, Cursor, Zed).
+[![npm](https://img.shields.io/npm/v/@juicedresume/mcp)](https://www.npmjs.com/package/@juicedresume/mcp)
+[![MCP Registry](https://img.shields.io/badge/MCP%20Registry-com.juicedresume%2Fmcp-blue)](https://registry.modelcontextprotocol.io)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+
+> **The only resume builder with a first-party [Model Context Protocol](https://modelcontextprotocol.io) server.**
+> Connect **Claude Code**, **Claude Desktop**, **Cursor**, or **Zed** to [JuicedResume](https://juicedresume.com) and **build, score, tailor, and export ATS-optimized resumes** — in natural language, against your real cloud resumes.
+
+Looking for a **resume builder with an MCP server for Claude**? This is it. Instead of copy-pasting your resume into a chat, point your MCP client at your JuicedResume account and ask Claude to *score it against 60+ ATS checks*, *tailor it to a job description*, or *rewrite a weak bullet* — the changes save straight to your resume and show up in the web editor instantly.
+
+## Why use the MCP server
+
+- **Score your resume from your editor** — run the same 60+ check, 7-dimension ATS rubric JuicedResume uses on the web, without leaving Claude.
+- **Tailor to a job description** — get the matched and missing keywords for a specific JD and apply the changes in place.
+- **Edit structurally** — add/remove/reorder sections and entries, set the template and styling, all as tool calls.
+- **Export** — produce an ATS-perfect PDF or LaTeX.
+- **Round-trips with the web app** — anything you change over MCP appears in the JuicedResume web editor immediately, and vice-versa.
 
 ## Install
 
@@ -10,7 +25,7 @@ npm install -g @juicedresume/mcp
 
 Or use `npx` directly in your MCP config — no install needed.
 
-## Use in Claude Code
+### Claude Code
 
 ```bash
 claude mcp add --transport stdio juicedresume -- npx -y @juicedresume/mcp
@@ -18,16 +33,15 @@ claude mcp add --transport stdio juicedresume -- npx -y @juicedresume/mcp
 
 Then `/mcp` inside Claude Code → enable `juicedresume`.
 
-## Use in Claude Desktop / other clients
-
-Add to your MCP server config:
+### Claude Desktop / Cursor / Zed / any MCP client
 
 ```json
 {
   "mcpServers": {
     "juicedresume": {
       "command": "npx",
-      "args": ["-y", "@juicedresume/mcp"]
+      "args": ["-y", "@juicedresume/mcp"],
+      "env": { "JUICEDRESUME_TOKEN": "your-token-here" }
     }
   }
 }
@@ -35,7 +49,7 @@ Add to your MCP server config:
 
 ## Authentication
 
-Grab your MCP token from **Settings → AI** at [juicedresume.com](https://juicedresume.com) and add it to the server's environment. MCP access is included on the Basic, Pro, and Lifetime plans.
+Grab your MCP token from **Settings → AI** at [juicedresume.com](https://juicedresume.com) and pass it as `JUICEDRESUME_TOKEN`. MCP access is **free for every signed-in user** (Free plan included — 10 calls / 30 days); Basic, Pro, and Lifetime plans get unlimited MCP calls. AI actions (score, tailor) use monthly AI credits.
 
 ## Tools
 
@@ -52,7 +66,14 @@ Grab your MCP token from **Settings → AI** at [juicedresume.com](https://juice
 
 ## How it works
 
-The MCP server reads and writes to the same store as the JuicedResume web app at <https://juicedresume.com>. Changes made via MCP appear in the web editor immediately, and vice-versa.
+The MCP server reads and writes to the same store as the JuicedResume web app at <https://juicedresume.com>. Changes made via MCP appear in the web editor immediately, and vice-versa. Transport is **stdio**; the package exposes the `juicedresume-mcp` (and `juiced-mcp`) binaries.
+
+## Links
+
+- **Docs:** <https://juicedresume.com/mcp>
+- **npm:** <https://www.npmjs.com/package/@juicedresume/mcp>
+- **MCP Registry:** `com.juicedresume/mcp`
+- **Web app:** <https://juicedresume.com>
 
 ## Source & build
 
